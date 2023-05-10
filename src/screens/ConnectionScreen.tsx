@@ -6,7 +6,6 @@ import ScreenContext from '../ScreenContext';
 const ConnectionScreen = () => {
   const [devices, setDevices] = useState([]);
   const [manager, setManager] = useState(null);
-  const {setScreen} = useContext(ScreenContext);
 
   useEffect(() => {
     if (!manager) {
@@ -55,10 +54,6 @@ const ConnectionScreen = () => {
     } catch (error) {
       console.log('Connection error:', error);
     }
-  };
-
-  const onConnect = () => {
-    setScreen('Control');
   };
 
   return (
