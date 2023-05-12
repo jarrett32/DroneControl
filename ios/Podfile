@@ -57,4 +57,7 @@ target 'Drone' do
     )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
+
+  pod 'CocoaAsyncSocket', '~> 7.6.5'
+
 end

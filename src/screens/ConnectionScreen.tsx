@@ -2,6 +2,7 @@ import React, {useState, useEffect, useContext} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
 import {BleManager} from 'react-native-ble-plx';
 import ScreenContext from '../ScreenContext';
+import sendDataToNano from '../sendData';
 
 const ConnectionScreen = () => {
   const [devices, setDevices] = useState([]);
@@ -74,6 +75,9 @@ const ConnectionScreen = () => {
         )}
         keyExtractor={item => item.id}
       />
+      <TouchableOpacity onPress={sendData} style={styles.scanButton}>
+        <Text style={styles.scanButtonText}>Send Packets</Text>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Connection">
+      <Stack.Navigator initialRouteName="Control">
         <Stack.Screen name="Connection" component={ConnectionScreen} />
         <Stack.Screen name="Control" component={ControlScreen} />
         <Stack.Screen name="Status" component={StatusScreen} />

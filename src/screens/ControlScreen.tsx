@@ -2,12 +2,12 @@ import React from 'react';
 import {View, StyleSheet, Dimensions, Button} from 'react-native';
 import {KorolJoystick} from 'korol-joystick';
 import {useNavigation} from '@react-navigation/native';
-
+import sendDataToNano from '../sendData';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const handleMove = data => {
-  console.log(data);
+  sendDataToNano(data);
 };
 
 const ControlScreen = () => {
@@ -19,8 +19,8 @@ const ControlScreen = () => {
         <Button title="Status" onPress={() => navigation.navigate('Status')} />
       </View>
       <View style={styles.joystickContainer}>
-        <KorolJoystick color="#06b6d4" radius={75} onMove={handleMove} />
-        <KorolJoystick color="#06b6d4" radius={75} onMove={handleMove} />
+        <KorolJoystick color="#06b6d4" radius={125} onMove={handleMove} />
+        <KorolJoystick color="#06b6d4" radius={125} onMove={handleMove} />
       </View>
     </View>
   );
