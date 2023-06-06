@@ -75,10 +75,6 @@ const ControlScreen = () => {
             onPress={handleArmDisarm}
           />
           <DroneButton title="Land" onPress={handleLand} />
-          <DroneButton
-            title="Status"
-            onPress={() => navigation.navigate('Status')}
-          />
         </View>
       </View>
     </View>
