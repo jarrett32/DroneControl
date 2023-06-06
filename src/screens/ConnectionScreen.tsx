@@ -1,127 +1,156 @@
-import React, {useState, useEffect, useContext} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
-import {BleManager} from 'react-native-ble-plx';
-import ScreenContext from '../ScreenContext';
-import sendDataToNano from '../sendData';
+import React, {useState, useContext} from 'react';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import useSendDataToNano from '../sendData';
+import {DroneContext} from '../DroneProvider';
 
 const ConnectionScreen = () => {
-  const [devices, setDevices] = useState([]);
-  const [manager, setManager] = useState(null);
+  const navigation = useNavigation();
+  const sendDataToNano = useSendDataToNano();
+  const context = useContext(DroneContext);
 
-  useEffect(() => {
-    if (!manager) {
-      setManager(new BleManager());
+  const connectToDrone = async (newIp: string, newName: string) => {
+    try {
+      console.log('Connecting to drone...' + newIp);
+      await sendDataToNano('connect-app', {}, newIp);
+      context.setConnected(true);
+      context.setName(newName);
+      context.setIp(newIp);
+      console.log('Connected to drone, ' + newIp);
+      navigation.navigate('Control');
+    } catch (error) {
+      context.setConnected(false);
+      console.log(error);
     }
-  }, [manager]);
-
-  const scanForDevices = () => {
-    if (!manager) return;
-
-    const subscription = manager.onStateChange(state => {
-      if (state === 'PoweredOn') {
-        manager.startDeviceScan(null, null, (error, device) => {
-          if (error) {
-            console.log('Scanning error:', error);
-            return;
-          }
-
-          if (device && device.name) {
-            setDevices(prevDevices => {
-              const existingDevice = prevDevices.find(d => d.id === device.id);
-              if (!existingDevice) {
-                return [...prevDevices, {id: device.id, name: device.name}];
-              }
-              return prevDevices;
-            });
-          }
-        });
-      }
-    }, true);
-
-    return () => {
-      subscription.remove();
-      manager.stopDeviceScan();
-    };
   };
 
-  const connectToDevice = async device => {
-    if (!manager) return;
-
-    console.log('Connecting to:', device.name);
-
+  const disconnectFromDrone = async () => {
     try {
-      const connectedDevice = await manager.connectToDevice(device.id);
-      console.log('Connected to device:', connectedDevice);
+      console.log('Disconnecting from drone...' + context.ip);
+      await sendDataToNano('disconnect-app', {}, context.ip);
+      context.setConnected(false);
+      context.setName('');
+      context.setIp('');
     } catch (error) {
-      console.log('Connection error:', error);
+      console.log(error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Connect to Drone</Text>
-      <TouchableOpacity onPress={scanForDevices} style={styles.scanButton}>
-        <Text style={styles.scanButtonText}>Scan</Text>
-      </TouchableOpacity>
-      <FlatList
-        data={devices}
-        renderItem={({item}) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.deviceItem}
-            onPress={() => connectToDevice(item)}>
-            <Text style={styles.deviceName}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={item => item.id}
-      />
-      <TouchableOpacity onPress={sendData} style={styles.scanButton}>
-        <Text style={styles.scanButtonText}>Send Packets</Text>
-      </TouchableOpacity>
+      {context.connected ? (
+        <TouchableOpacity
+          style={styles.connectionStatus}
+          onPress={disconnectFromDrone}>
+          <View style={styles.connectedDot} />
+          <Text style={styles.text}>{context.name}</Text>
+          <Text style={styles.subtext}>{context.ip}</Text>
+        </TouchableOpacity>
+      ) : null}
+      <Text style={styles.title}>Connect</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => connectToDrone('192.168.12.108', 'Home')}>
+          <Text style={styles.buttonText}>Home</Text>
+          <Text style={styles.subtext}>192.168.12.108</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => connectToDrone('127.0.0.1', 'Hotspot')}>
+          <Text style={styles.buttonText}>Hotspot</Text>
+          <Text style={styles.subtext}>127.0.0.1</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.inputLabel}>Other IP:</Text>
+      {/* <TextInput
+        style={styles.input}
+        placeholder="Enter IP"
+        onChangeText={text => setIp(text)}
+        defaultValue={ip}
+        onSubmitEditing={() => connectToDrone(ip, 'Other')}
+      /> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f2f2f2',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
-    backgroundColor: '#F5FCFF',
-    paddingVertical: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginVertical: 8,
+    textAlign: 'center',
   },
-  scanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    padding: 10,
-    width: 200,
-    borderWidth: 1,
-    borderColor: '#000',
-    borderRadius: 5,
-  },
-  scanButtonText: {
-    marginLeft: 5,
-    fontSize: 18,
-  },
-  deviceItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#000',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  deviceName: {
+  text: {
+    fontSize: 24,
     marginLeft: 10,
-    fontSize: 16,
+  },
+  subtext: {
+    fontSize: 18,
+    marginLeft: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 16,
+  },
+  button: {
+    padding: 10,
+    borderWidth: 2,
+    borderColor: '#000',
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  input: {
+    height: 40,
+    width: '100%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 5,
+  },
+  inputLabel: {
+    fontSize: 18,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  connectionStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    padding: 10,
+    borderWidth: 2,
+    borderColor: '#000',
+    borderRadius: 5,
+    width: '100%',
+  },
+  connectedDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'green',
+  },
+  disconnectText: {
+    fontSize: 14,
+    marginTop: 4,
+    color: 'red',
   },
 });
 

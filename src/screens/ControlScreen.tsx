@@ -1,26 +1,65 @@
-import React from 'react';
-import {View, StyleSheet, Dimensions, Button} from 'react-native';
-import {KorolJoystick} from 'korol-joystick';
+import React, {useState} from 'react';
+import {View, StyleSheet, Dimensions, Button, Text} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import sendDataToNano from '../sendData';
+import useSendDataToNano from '../sendData';
+
+const DroneStatus = {
+  UNARMED: 'unarmed',
+  ARMED: 'armed',
+  FLYING: 'flying',
+  LANDING: 'landing',
+};
+
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const handleMove = data => {
-  sendDataToNano(data);
-};
+const DroneButton = ({title, onPress, ...props}) => (
+  <View style={styles.buttonContainer}>
+    <Button title={title} onPress={onPress} {...props} />
+  </View>
+);
 
 const ControlScreen = () => {
   const navigation = useNavigation();
+  const sendDataToNano = useSendDataToNano();
+  const [droneStatus, setDroneStatus] = useState(DroneStatus.UNARMED);
+
+  const handleArmDisarm = () => {
+    if (droneStatus === DroneStatus.UNARMED) {
+      setDroneStatus(DroneStatus.ARMED);
+      sendDataToNano('arm', {});
+    } else {
+      setDroneStatus(DroneStatus.UNARMED);
+      sendDataToNano('disarm', {});
+    }
+  };
+
+  const handleLand = () => {
+    if (
+      droneStatus === DroneStatus.ARMED ||
+      droneStatus === DroneStatus.FLYING
+    ) {
+      setDroneStatus(DroneStatus.LANDING);
+      sendDataToNano('land', {});
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.topRightButton}>
-        <Button title="Status" onPress={() => navigation.navigate('Status')} />
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusTitle}>Drone Status:</Text>
+        <Text style={styles.statusValue}>{droneStatus}</Text>
       </View>
-      <View style={styles.joystickContainer}>
-        <KorolJoystick color="#06b6d4" radius={125} onMove={handleMove} />
-        <KorolJoystick color="#06b6d4" radius={125} onMove={handleMove} />
+      <View style={styles.buttonGroup}>
+        <DroneButton
+          title={droneStatus === DroneStatus.UNARMED ? 'Arm' : 'Disarm'}
+          onPress={handleArmDisarm}
+        />
+        <DroneButton title="Land" onPress={handleLand} />
+        <DroneButton
+          title="Status"
+          onPress={() => navigation.navigate('Status')}
+        />
       </View>
     </View>
   );
@@ -32,17 +71,28 @@ const styles = StyleSheet.create({
     height: windowHeight,
     flexDirection: 'column',
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  topRightButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 30,
   },
-  joystickContainer: {
+  statusTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  statusValue: {
+    fontSize: 20,
+  },
+  buttonGroup: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    alignItems: 'center',
-    verticalAlign: 'center',
+    width: '100%',
+  },
+  buttonContainer: {
+    marginHorizontal: 10,
   },
 });
 

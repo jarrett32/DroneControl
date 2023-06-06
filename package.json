@@ -21,17 +21,22 @@
     "react": "18.2.0",
     "react-native": "0.71.7",
     "react-native-ble-plx": "^2.0.3",
+    "react-native-device-info": "^10.6.0",
     "react-native-gesture-handler": "^2.9.0",
+    "react-native-permissions": "^3.8.0",
     "react-native-safe-area-context": "^4.5.2",
     "react-native-screens": "^3.20.0",
     "react-native-svg": "^13.9.0",
     "react-native-udp": "^4.1.7",
     "react-native-vector-icons": "^9.2.0"
   },
+  "reactNativePermissionsIOS": [
+    "BluetoothPeripheral"
+  ],
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
-    "@babel/runtime": "^7.20.0",
+    "@babel/runtime": "^7.21.5",
     "@react-native-community/eslint-config": "^3.2.0",
     "@tsconfig/react-native": "^2.0.2",
     "@types/jest": "^29.2.1",
