@@ -147,11 +147,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: 'green',
   },
-  disconnectText: {
-    fontSize: 14,
-    marginTop: 4,
-    color: 'red',
-  },
 });
 
 export default ConnectionScreen;
