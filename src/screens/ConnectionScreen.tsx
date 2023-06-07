@@ -1,5 +1,6 @@
 import React, {useState, useContext} from 'react';
 import {
+  Button,
   StyleSheet,
   Text,
   TextInput,
@@ -14,6 +15,8 @@ const ConnectionScreen = () => {
   const navigation = useNavigation();
   const sendDataToNano = useSendDataToNano();
   const context = useContext(DroneContext);
+
+  const [ip, setIp] = useState('');
 
   const connectToDrone = async (newIp: string, newName: string) => {
     try {
@@ -63,19 +66,27 @@ const ConnectionScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => connectToDrone('127.0.0.1', 'Hotspot')}>
+          onPress={() => connectToDrone('172.20.10.9', 'Hotspot')}>
           <Text style={styles.buttonText}>Hotspot</Text>
-          <Text style={styles.subtext}>127.0.0.1</Text>
+          <Text style={styles.subtext}>172.20.10.9</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.inputLabel}>Other IP:</Text>
-      {/* <TextInput
-        style={styles.input}
-        placeholder="Enter IP"
-        onChangeText={text => setIp(text)}
-        defaultValue={ip}
-        onSubmitEditing={() => connectToDrone(ip, 'Other')}
-      /> */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter IP"
+          onChangeText={setIp}
+          value={ip}
+        />
+        <Button
+          title="Submit"
+          onPress={() => {
+            connectToDrone(ip, 'Other');
+            setIp('');
+          }}
+        />
+      </View>
     </View>
   );
 };
@@ -117,12 +128,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: 'center',
   },
-  input: {
-    height: 40,
+  inputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     width: '100%',
+    marginTop: 10,
+  },
+  input: {
+    flex: 1,
+    marginRight: 10,
+    height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    marginTop: 10,
     padding: 10,
     borderRadius: 5,
   },
